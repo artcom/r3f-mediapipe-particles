@@ -1,0 +1,45 @@
+default:
+  image: node:16.17.0
+
+stages:
+  - build
+  - deploy
+
+build:
+  stage: build
+  variables:
+    GIT_DEPTH: "1"
+    GIT_SUBMODULE_STRATEGY: recursive
+  script:
+    - ssh-keyscan -t rsa -H gitlab.artcom.de >> ~/.ssh/known_hosts
+    - npm install
+    - BUILD_PATH=dist npm run build -- --base=$(echo "/public/${CI_PROJECT_NAME//\//-}/${CI_COMMIT_BRANCH//\//-}/")
+    - 'echo {\"commit\": \"$CI_BUILD_REF\", \"buildJob\": $CI_JOB_ID} > dist/build.json'
+    - echo "JOB_ID=$CI_JOB_ID" >> build.env
+  artifacts:
+    name: $CI_PROJECT_NAME-$CI_BUILD_REF
+    reports:
+      dotenv: build.env
+    paths:
+      - dist/
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: manual
+      variables:
+        SUB_ROUTE: "$CI_PROJECT_NAME-$CI_COMMIT_BRANCH"
+
+deploy:
+  stage: deploy
+  variables:
+    HOST: "pages.acmade.de"
+    USER: deployment
+    STATIC: "/usr/share/nginx/html/restricted"
+  script:
+    - apt-get update --yes && apt-get install rsync --yes
+    - ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
+    - ssh $USER@$HOST mkdir -p $STATIC/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - rsync -av --delete dist/ $USER@$HOST:$STATIC/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - ssh $USER@$HOST sudo chown -R :www-data $STATIC/$CI_PROJECT_NAME
+  environment: staging
