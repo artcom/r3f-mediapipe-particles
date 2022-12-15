@@ -14,17 +14,7 @@ const App = () => {
     context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
 
     if (segmentationMask) {
-      // particlesRef.current.setImage(segmentationMask)
-
-      context.filter = `blur(${5}px)`
-      context.drawImage(
-        segmentationMask,
-        0,
-        0,
-        segmentationMask.width,
-        segmentationMask.height,
-      )
-      particlesRef.current.setImage(canvasRef.current)
+      particlesRef.current.setImage(segmentationMask)
     }
   }, [])
 

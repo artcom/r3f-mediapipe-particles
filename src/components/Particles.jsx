@@ -29,13 +29,12 @@ const Particles = forwardRef((_, ref) => {
       let numVisible = 0
       const range = [100, 200]
 
-      const canvas = document.createElement("canvas")
+      const canvas = new OffscreenCanvas(width, height)
       const ctx = canvas.getContext("2d")
 
-      canvas.width = width
-      canvas.height = height
       ctx.scale(1, -1)
       ctx.drawImage(texture.image, 0, 0, width, height * -1)
+
       const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 
       const originalColors = Float32Array.from(imgData.data)
@@ -47,8 +46,6 @@ const Particles = forwardRef((_, ref) => {
         )
           numVisible++
       }
-
-      console.log("numVisible", numVisible)
 
       const indices = new Uint16Array(numPoints)
       const offsets = new Float32Array(numPoints * 3)
