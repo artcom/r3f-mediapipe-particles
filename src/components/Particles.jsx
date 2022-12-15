@@ -1,4 +1,5 @@
 import { useFrame } from "@react-three/fiber"
+import { useControls } from "leva"
 import {
   forwardRef,
   useImperativeHandle,
@@ -82,6 +83,12 @@ const Particles = forwardRef((_, ref) => {
     },
   }))
 
+  const { random, depth, size } = useControls({
+    random: { value: 2.0, min: 0, max: 100 },
+    depth: { value: 16.0, min: 0, max: 100 },
+    size: { value: 6.0, min: 0, max: 100 },
+  })
+
   return (
     <>
       {attributes && (
@@ -120,6 +127,9 @@ const Particles = forwardRef((_, ref) => {
             uTextureSize={
               new Vector2(texture.image.width, texture.image.height)
             }
+            uRandom={random}
+            uDepth={depth}
+            uSize={size}
             blending={AdditiveBlending}
             depthWrite={false}
           />
