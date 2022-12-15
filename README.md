@@ -1,4 +1,4 @@
-# r3f-particles
+# r3f-mediapipe-particles
 
 ```
 npm install
