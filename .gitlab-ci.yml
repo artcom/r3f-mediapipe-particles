@@ -1,25 +1,19 @@
-default:
-  image: node:16.17.0
-
 stages:
   - build
   - deploy
 
 build:
+  image: node:16.17.1
   stage: build
   variables:
     GIT_DEPTH: "1"
     GIT_SUBMODULE_STRATEGY: recursive
   script:
-    - ssh-keyscan -t rsa -H gitlab.artcom.de >> ~/.ssh/known_hosts
     - npm install
-    - BUILD_PATH=dist npm run build -- --base=$(echo "/public/${CI_PROJECT_NAME//\//-}/${CI_COMMIT_BRANCH//\//-}/")
+    - BUILD_PATH=dist npm run build -- --base=/restricted/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
     - 'echo {\"commit\": \"$CI_BUILD_REF\", \"buildJob\": $CI_JOB_ID} > dist/build.json'
-    - echo "JOB_ID=$CI_JOB_ID" >> build.env
   artifacts:
     name: $CI_PROJECT_NAME-$CI_BUILD_REF
-    reports:
-      dotenv: build.env
     paths:
       - dist/
   rules:
@@ -27,19 +21,24 @@ build:
       when: always
     - if: '$CI_COMMIT_BRANCH != "main"'
       when: manual
-      variables:
-        SUB_ROUTE: "$CI_PROJECT_NAME-$CI_COMMIT_BRANCH"
 
 deploy:
+  image: gitlab.artcom.de:5005/artcom/container-images/rsync-gitlab:v1.1.0
   stage: deploy
   variables:
-    HOST: "pages.acmade.de"
-    USER: deployment
-    STATIC: "/usr/share/nginx/html/restricted"
+    HOST_NAME: pages.acmade.de
+    USER_NAME: deployment
+    WEBSERVER_GID: 10001
+    STATIC_DIR: /srv/docker/volumes/pages_static/_data/restricted/
   script:
-    - apt-get update --yes && apt-get install rsync --yes
-    - ssh-keyscan -H $HOST >> ~/.ssh/known_hosts
-    - ssh $USER@$HOST mkdir -p $STATIC/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
-    - rsync -av --delete dist/ $USER@$HOST:$STATIC/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
-    - ssh $USER@$HOST sudo chown -R :www-data $STATIC/$CI_PROJECT_NAME
-  environment: staging
+    - ssh-keyscan -H $HOST_NAME >> ~/.ssh/known_hosts
+    - ssh $USER_NAME@$HOST_NAME sudo mkdir -p $STATIC_DIR/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - rsync -avz --delete --rsync-path="sudo rsync" dist/ $USER_NAME@$HOST_NAME:$STATIC_DIR/$CI_PROJECT_NAME/$CI_COMMIT_BRANCH
+    - ssh $USER_NAME@$HOST_NAME sudo chown -R $USER_NAME:$WEBSERVER_GID $STATIC_DIR/$CI_PROJECT_NAME
+    - ssh $USER_NAME@$HOST_NAME sudo find $STATIC_DIR/$CI_PROJECT_NAME -type d -exec sudo chmod 0750 {} +
+    - ssh $USER_NAME@$HOST_NAME sudo find $STATIC_DIR/$CI_PROJECT_NAME -type f -exec sudo chmod 0640 {} +
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - if: '$CI_COMMIT_BRANCH != "main"'
+      when: manual
