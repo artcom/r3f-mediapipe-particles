@@ -1,6 +1,7 @@
 precision highp float;
 
 uniform sampler2D uTexture;
+uniform vec3 uColor;
 
 varying vec2 vPUv;
 varying vec2 vUv;
@@ -34,7 +35,7 @@ void main() {
 	// // gl_FragColor = vec4(1.0,0.0,0.0,1.0);
 
 
-	vec3 color = vec3(0.34, 0.53, 0.96);
+	vec3 color = uColor;
 
   float strength = distance(vUv, vec2(0.5));
   strength = 1.0 - strength;

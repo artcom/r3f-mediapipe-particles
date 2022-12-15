@@ -13,6 +13,7 @@ import {
   Float32BufferAttribute,
   Uint16BufferAttribute,
   Vector2,
+  Vector3,
 } from "three"
 import { ParticlesMaterial } from "./ParticlesMaterial"
 
@@ -83,10 +84,11 @@ const Particles = forwardRef((_, ref) => {
     },
   }))
 
-  const { random, depth, size } = useControls({
+  const { random, depth, size, color } = useControls({
     random: { value: 2.0, min: 0, max: 100 },
     depth: { value: 16.0, min: -100, max: 100 },
     size: { value: 6.0, min: 0, max: 100 },
+    color: { value: { r: 87, g: 135, b: 245 } },
   })
 
   return (
@@ -130,6 +132,9 @@ const Particles = forwardRef((_, ref) => {
             uRandom={random}
             uDepth={depth}
             uSize={size}
+            uColor={
+              new Vector3(color.r / 255.0, color.g / 255.0, color.b / 255.0)
+            }
             blending={AdditiveBlending}
             depthWrite={false}
           />
