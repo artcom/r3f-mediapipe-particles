@@ -85,14 +85,14 @@ const Particles = forwardRef((_, ref) => {
 
   const { random, depth, size } = useControls({
     random: { value: 2.0, min: 0, max: 100 },
-    depth: { value: 16.0, min: 0, max: 100 },
+    depth: { value: 16.0, min: -100, max: 100 },
     size: { value: 6.0, min: 0, max: 100 },
   })
 
   return (
     <>
       {attributes && (
-        <mesh>
+        <mesh rotation-y={Math.PI}>
           <instancedBufferGeometry
             index={new Uint16BufferAttribute([0, 2, 1, 2, 3, 1], 1)}
             attributes-position={
