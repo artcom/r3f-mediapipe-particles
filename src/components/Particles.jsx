@@ -18,33 +18,43 @@ import {
 import { ParticlesMaterial } from "./ParticlesMaterial"
 
 const Particles = forwardRef((_, ref) => {
-  const [texture, setTexture] = useState()
+  const [canvasTexture, setCanvasTexture] = useState()
 
   const particlesMaterialRef = useRef()
 
-  const attributes = useMemo(() => {
-    if (texture) {
-      const { width, height } = texture.image
+  const { blur, thresholds } = useControls({
+    thresholds: { value: [100, 200], min: 0, max: 255 },
+    blur: { value: 40, min: 0, max: 50 },
+  })
+
+  const data = useMemo(() => {
+    if (canvasTexture) {
+      const { width, height } = canvasTexture.image
 
       const numPoints = width * height
 
       let numVisible = 0
-      const range = [100, 200]
 
-      const canvas = new OffscreenCanvas(width, height)
-      const ctx = canvas.getContext("2d")
+      const offscreen = new OffscreenCanvas(width, height)
+      const context = offscreen.getContext("2d")
+      context.filter = `blur(${blur}px)`
 
-      ctx.scale(1, -1)
-      ctx.drawImage(texture.image, 0, 0, width, height * -1)
+      context.scale(1, -1)
+      context.drawImage(canvasTexture.image, 0, 0, width, height * -1)
 
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+      const imgData = context.getImageData(
+        0,
+        0,
+        offscreen.width,
+        offscreen.height,
+      )
 
       const originalColors = Float32Array.from(imgData.data)
 
       for (let i = 0; i < numPoints; i++) {
         if (
-          originalColors[i * 4 + 3] > range[0] &&
-          originalColors[i * 4 + 3] < range[1]
+          originalColors[i * 4 + 3] >= thresholds[0] &&
+          originalColors[i * 4 + 3] <= thresholds[1]
         )
           numVisible++
       }
@@ -54,8 +64,8 @@ const Particles = forwardRef((_, ref) => {
 
       for (let i = 0, j = 0; i < numPoints; i++) {
         if (
-          originalColors[i * 4 + 3] <= range[0] ||
-          originalColors[i * 4 + 3] >= range[1]
+          originalColors[i * 4 + 3] <= thresholds[0] ||
+          originalColors[i * 4 + 3] >= thresholds[1]
         ) {
           continue
         }
@@ -68,9 +78,12 @@ const Particles = forwardRef((_, ref) => {
         j++
       }
 
-      return { indices, offsets, numVisible }
+      return {
+        texture: new CanvasTexture(offscreen),
+        attributes: { indices, offsets, numVisible },
+      }
     }
-  }, [texture])
+  }, [canvasTexture, blur])
 
   useFrame(({ clock }) => {
     if (particlesMaterialRef.current) {
@@ -80,20 +93,21 @@ const Particles = forwardRef((_, ref) => {
 
   useImperativeHandle(ref, () => ({
     setImage: (image) => {
-      setTexture(new CanvasTexture(image))
+      setCanvasTexture(new CanvasTexture(image))
     },
   }))
 
-  const { random, depth, size, color } = useControls({
+  const { random, depth, size, color, speed } = useControls({
     random: { value: 2.0, min: 0, max: 100 },
     depth: { value: 16.0, min: -100, max: 100 },
     size: { value: 6.0, min: 0, max: 100 },
     color: { value: { r: 87, g: 135, b: 245 } },
+    speed: { value: 0.01, min: 0.0, max: 1.0 },
   })
 
   return (
     <>
-      {attributes && (
+      {data && (
         <mesh rotation-y={Math.PI}>
           <instancedBufferGeometry
             index={new Uint16BufferAttribute([0, 2, 1, 2, 3, 1], 1)}
@@ -114,24 +128,25 @@ const Particles = forwardRef((_, ref) => {
             }>
             <instancedBufferAttribute
               attach="attributes-pindex"
-              args={[attributes.indices, 1, false]}
+              args={[data.attributes.indices, 1, false]}
             />
             <instancedBufferAttribute
               attach="attributes-offset"
-              args={[attributes.offsets, 3, false]}
+              args={[data.attributes.offsets, 3, false]}
             />
             <instancedBufferAttribute />
           </instancedBufferGeometry>
           <particlesMaterial
             ref={particlesMaterialRef}
             key={ParticlesMaterial.key}
-            uTexture={texture}
+            uTexture={data.texture}
             uTextureSize={
-              new Vector2(texture.image.width, texture.image.height)
+              new Vector2(data.texture.image.width, data.texture.image.height)
             }
             uRandom={random}
             uDepth={depth}
             uSize={size}
+            uSpeed={speed}
             uColor={
               new Vector3(color.r / 255.0, color.g / 255.0, color.b / 255.0)
             }

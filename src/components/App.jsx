@@ -5,14 +5,9 @@ import PoseDetection from "../pose/poseDetection"
 import Particles from "./Particles"
 
 const App = () => {
-  const canvasRef = useRef()
   const particlesRef = useRef()
 
   const onPoseResults = useCallback(({ segmentationMask }) => {
-    const context = canvasRef.current.getContext("2d")
-    context.save()
-    context.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-
     if (segmentationMask) {
       particlesRef.current.setImage(segmentationMask)
     }
@@ -32,7 +27,6 @@ const App = () => {
         <Particles ref={particlesRef} />
         <Stats />
       </Canvas>
-      <canvas ref={canvasRef} width={320} height={240} />
       <Suspense>
         <PoseDetection onPoseResults={onPoseResults} />
       </Suspense>
