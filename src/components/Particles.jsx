@@ -17,7 +17,13 @@ import {
 } from "three"
 import { ParticlesMaterial } from "./ParticlesMaterial"
 
-const renderOffscreenToCanvas = (debugCanvasRef, bitmap, width, height) => {
+const renderOffscreenToCanvas = (
+  debugCanvasRef,
+  bitmap,
+  width,
+  height,
+  visible,
+) => {
   const debugContext = debugCanvasRef.current.getContext("2d")
   debugContext.clearRect(
     0,
@@ -26,7 +32,10 @@ const renderOffscreenToCanvas = (debugCanvasRef, bitmap, width, height) => {
     debugCanvasRef.current.height,
   )
   debugContext.scale(1, -1)
-  debugContext.drawImage(bitmap, 0, 0, width, height * -1)
+
+  if (visible) {
+    debugContext.drawImage(bitmap, 0, 0, width, height * -1)
+  }
 }
 
 const Particles = forwardRef(({ debugCanvasRef }, ref) => {
@@ -34,9 +43,10 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
   const particlesMaterialRef = useRef()
 
-  const { blur, thresholds } = useControls({
+  const { blur, thresholds, silhouette } = useControls({
     thresholds: { value: [100, 200], min: 0, max: 255 },
     blur: { value: 9, min: 0, max: 50 },
+    silhouette: false,
   })
 
   const data = useMemo(() => {
@@ -91,7 +101,8 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
       }
 
       const bitmap = offscreen.transferToImageBitmap()
-      // renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height)
+
+      renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, silhouette)
 
       return {
         texture: new CanvasTexture(bitmap),
