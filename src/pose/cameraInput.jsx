@@ -26,7 +26,7 @@ const CameraInput = ({ onFrame }) => {
     startCamera()
   }, [])
 
-  return <video className={css.hide} ref={videoRef}></video>
+  return <video className={css.cameraStream} ref={videoRef}></video>
 }
 
 export default CameraInput

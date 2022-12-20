@@ -6,6 +6,7 @@ import Particles from "./Particles"
 
 const App = () => {
   const particlesRef = useRef()
+  const canvasRef = useRef()
 
   const onPoseResults = useCallback(({ segmentationMask }) => {
     if (segmentationMask) {
@@ -15,6 +16,15 @@ const App = () => {
 
   return (
     <>
+      <Suspense>
+        <PoseDetection onPoseResults={onPoseResults} />
+      </Suspense>
+      <canvas
+        ref={canvasRef}
+        width={320}
+        height={240}
+        className={"silhouette-canvas"}
+      />
       <Canvas>
         <PerspectiveCamera
           makeDefault
@@ -22,14 +32,12 @@ const App = () => {
           near={1}
           far={10000}
           position={[0, 0, 300]}
+          zoom={1.35}
         />
         <OrbitControls />
-        <Particles ref={particlesRef} />
+        <Particles ref={particlesRef} debugCanvasRef={canvasRef} />
         <Stats />
       </Canvas>
-      <Suspense>
-        <PoseDetection onPoseResults={onPoseResults} />
-      </Suspense>
     </>
   )
 }

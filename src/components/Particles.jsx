@@ -17,14 +17,26 @@ import {
 } from "three"
 import { ParticlesMaterial } from "./ParticlesMaterial"
 
-const Particles = forwardRef((_, ref) => {
+const renderOffscreenToCanvas = (debugCanvasRef, bitmap, width, height) => {
+  const debugContext = debugCanvasRef.current.getContext("2d")
+  debugContext.clearRect(
+    0,
+    0,
+    debugCanvasRef.current.width,
+    debugCanvasRef.current.height,
+  )
+  debugContext.scale(1, -1)
+  debugContext.drawImage(bitmap, 0, 0, width, height * -1)
+}
+
+const Particles = forwardRef(({ debugCanvasRef }, ref) => {
   const [canvasTexture, setCanvasTexture] = useState()
 
   const particlesMaterialRef = useRef()
 
   const { blur, thresholds } = useControls({
     thresholds: { value: [100, 200], min: 0, max: 255 },
-    blur: { value: 40, min: 0, max: 50 },
+    blur: { value: 9, min: 0, max: 50 },
   })
 
   const data = useMemo(() => {
@@ -37,8 +49,8 @@ const Particles = forwardRef((_, ref) => {
 
       const offscreen = new OffscreenCanvas(width, height)
       const context = offscreen.getContext("2d")
-      context.filter = `blur(${blur}px)`
 
+      context.filter = `blur(${blur}px)`
       context.scale(1, -1)
       context.drawImage(canvasTexture.image, 0, 0, width, height * -1)
 
@@ -78,8 +90,11 @@ const Particles = forwardRef((_, ref) => {
         j++
       }
 
+      const bitmap = offscreen.transferToImageBitmap()
+      // renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height)
+
       return {
-        texture: new CanvasTexture(offscreen),
+        texture: new CanvasTexture(bitmap),
         attributes: { indices, offsets, numVisible },
       }
     }
@@ -99,8 +114,8 @@ const Particles = forwardRef((_, ref) => {
 
   const { random, depth, size, color, speed } = useControls({
     random: { value: 2.0, min: 0, max: 100 },
-    depth: { value: 16.0, min: -100, max: 100 },
-    size: { value: 6.0, min: 0, max: 100 },
+    depth: { value: -58.0, min: -100, max: 100 },
+    size: { value: 2.0, min: 0, max: 100 },
     color: { value: { r: 87, g: 135, b: 245 } },
     speed: { value: 0.01, min: 0.0, max: 1.0 },
   })

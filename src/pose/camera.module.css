@@ -1,19 +1,5 @@
-.camera-stream{
+.cameraStream {
   position: absolute;
-  left: 50px;
-  top: 50px;
-  width: 300px;
-  height: 200px;
-  z-index: var(--z-layer-top);
-  border-radius: 6px;
-  opacity: 0;
+  height: 100%;
   transform: scaleX(-1);
-}
-
-.camera-stream.camera-stream-active {
-  opacity: 1;
-}
-
-.hide {
-  display: none;
 }
