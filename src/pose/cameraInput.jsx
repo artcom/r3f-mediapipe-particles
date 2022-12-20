@@ -2,8 +2,11 @@ import { useEffect, useRef } from "react"
 import { Camera } from "@mediapipe/camera_utils"
 
 import css from "./camera.module.css"
+import { useControls } from "leva"
 
 const CameraInput = ({ onFrame }) => {
+  const { video } = useControls({ video: false })
+
   const videoRef = useRef()
   const cameraRef = useRef()
 
@@ -26,7 +29,12 @@ const CameraInput = ({ onFrame }) => {
     startCamera()
   }, [])
 
-  return <video className={css.cameraStream} ref={videoRef}></video>
+  return (
+    <video
+      className={css.cameraStream}
+      ref={videoRef}
+      style={{ display: `${video ? "inherit" : "none"}` }}></video>
+  )
 }
 
 export default CameraInput

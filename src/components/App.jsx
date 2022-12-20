@@ -23,7 +23,7 @@ const App = () => {
         ref={canvasRef}
         width={320}
         height={240}
-        className={"silhouette-canvas"}
+        className={"mask-canvas"}
       />
       <Canvas>
         <PerspectiveCamera
