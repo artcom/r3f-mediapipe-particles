@@ -43,10 +43,10 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
   const particlesMaterialRef = useRef()
 
-  const { blur, thresholds, silhouette } = useControls({
+  const { blur, thresholds, mask } = useControls({
     thresholds: { value: [100, 200], min: 0, max: 255 },
     blur: { value: 9, min: 0, max: 50 },
-    silhouette: false,
+    mask: false,
   })
 
   const data = useMemo(() => {
@@ -102,7 +102,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
       const bitmap = offscreen.transferToImageBitmap()
 
-      renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, silhouette)
+      renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, mask)
 
       return {
         texture: new CanvasTexture(bitmap),
