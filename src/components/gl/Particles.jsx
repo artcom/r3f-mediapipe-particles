@@ -103,13 +103,16 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
     },
   }))
 
-  const { random, depth, size, color, speed } = useControls({
-    random: { value: 2.0, min: 0, max: 100 },
-    depth: { value: -58.0, min: -100, max: 100 },
-    size: { value: 1, min: 0.0, max: 10.0 },
-    color: { value: { r: 235, g: 235, b: 235 } },
-    speed: { value: 0.1, min: 0.0, max: 0.5 },
-  })
+  const { random, depth, size, color, innerColor, exponent, speed } =
+    useControls({
+      random: { value: 2.0, min: 0, max: 100 },
+      depth: { value: -58.0, min: -100, max: 100 },
+      size: { value: 1, min: 0.0, max: 10.0 },
+      color: { value: { r: 235, g: 235, b: 235 } },
+      innerColor: { value: { r: 235, g: 235, b: 235 } },
+      speed: { value: 0.1, min: 0.0, max: 0.5 },
+      exponent: { value: 5.0, min: 0.0, max: 10.0 },
+    })
 
   return (
     <>
@@ -156,6 +159,14 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
             uColor={
               new Vector3(color.r / 255.0, color.g / 255.0, color.b / 255.0)
             }
+            uInnerColor={
+              new Vector3(
+                innerColor.r / 255.0,
+                innerColor.g / 255.0,
+                innerColor.b / 255.0,
+              )
+            }
+            uExponent={exponent}
             blending={AdditiveBlending}
             depthWrite={false}
           />

@@ -10,8 +10,8 @@ uniform float uTime;
 uniform float uDepth;
 uniform float uSpeed;
 
-varying vec2 vPUv;
 varying vec2 vUv;
+varying float vDistanceFactor;
 
 //
 // Description : Array and textureless GLSL 2D simplex noise function.
@@ -94,7 +94,9 @@ void main() {
 
 	// particle uv
 	vec2 puv = offset.xy / uTextureSize;
-	vPUv = puv;
+
+  // distance factor to center
+  vDistanceFactor = pow(1.0 - distance(puv, vec2(0.5)), 2.0);
 
 	// pixel color
 	vec4 colA = texture2D(uTexture, puv);
@@ -111,7 +113,7 @@ void main() {
 	displaced.xy -= uTextureSize * 0.5;
 
 	// particle size
-	float psize = (snoise(vec2(uTime, pindex) * 0.5) + 2.0);
+	float psize = snoise(vec2(uTime, pindex) * 0.5) + 2.0;
 	psize *= max(grey, 0.2);
 	psize *= uSize;
 
