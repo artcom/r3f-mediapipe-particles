@@ -55,8 +55,6 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
       const pixelCount = width * height
 
-      let numVisible = 0
-
       const offscreen = new OffscreenCanvas(width, height)
       const context = offscreen.getContext("2d")
       context.filter = `blur(${blur}px)`
@@ -68,17 +66,17 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
       const indices = new Uint16Array(pixelCount)
       const offsets = new Float32Array(pixelCount * 3)
 
-      for (let i = 0, j = 0; i < pixelCount; i++) {
+      let visibleCount = 0
+      for (let i = 0; i < pixelCount; i++) {
         const value = imageData.data[i * 4 + 3]
+
         if (value >= thresholds[0] && value <= thresholds[1]) {
-          numVisible++
+          offsets[visibleCount * 3 + 0] = i % width
+          offsets[visibleCount * 3 + 1] = Math.floor(i / width)
 
-          offsets[j * 3 + 0] = i % width
-          offsets[j * 3 + 1] = Math.floor(i / width)
+          indices[visibleCount] = i
 
-          indices[j] = i
-
-          j++
+          visibleCount++
         }
       }
 
@@ -88,7 +86,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
       return {
         texture: new CanvasTexture(bitmap),
-        attributes: { indices, offsets, numVisible },
+        attributes: { indices, offsets },
       }
     }
   }, [canvasTexture, blur])
