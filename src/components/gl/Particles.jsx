@@ -53,51 +53,33 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
     if (canvasTexture) {
       const { width, height } = canvasTexture.image
 
-      const numPoints = width * height
+      const pixelCount = width * height
 
       let numVisible = 0
 
       const offscreen = new OffscreenCanvas(width, height)
       const context = offscreen.getContext("2d")
-
       context.filter = `blur(${blur}px)`
       context.scale(1, -1)
+
       context.drawImage(canvasTexture.image, 0, 0, width, height * -1)
+      const imageData = context.getImageData(0, 0, width, height)
 
-      const imgData = context.getImageData(
-        0,
-        0,
-        offscreen.width,
-        offscreen.height,
-      )
+      const indices = new Uint16Array(pixelCount)
+      const offsets = new Float32Array(pixelCount * 3)
 
-      const originalColors = Float32Array.from(imgData.data)
-
-      for (let i = 0; i < numPoints; i++) {
-        if (
-          originalColors[i * 4 + 3] >= thresholds[0] &&
-          originalColors[i * 4 + 3] <= thresholds[1]
-        )
+      for (let i = 0, j = 0; i < pixelCount; i++) {
+        const value = imageData.data[i * 4 + 3]
+        if (value >= thresholds[0] && value <= thresholds[1]) {
           numVisible++
-      }
 
-      const indices = new Uint16Array(numPoints)
-      const offsets = new Float32Array(numPoints * 3)
+          offsets[j * 3 + 0] = i % width
+          offsets[j * 3 + 1] = Math.floor(i / width)
 
-      for (let i = 0, j = 0; i < numPoints; i++) {
-        if (
-          originalColors[i * 4 + 3] <= thresholds[0] ||
-          originalColors[i * 4 + 3] >= thresholds[1]
-        ) {
-          continue
+          indices[j] = i
+
+          j++
         }
-
-        offsets[j * 3 + 0] = i % width
-        offsets[j * 3 + 1] = Math.floor(i / width)
-
-        indices[j] = i
-
-        j++
       }
 
       const bitmap = offscreen.transferToImageBitmap()
