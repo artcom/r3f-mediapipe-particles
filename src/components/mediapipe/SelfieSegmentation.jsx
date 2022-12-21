@@ -1,11 +1,11 @@
-import { SelfieSegmentation } from "@mediapipe/selfie_segmentation"
+import { SelfieSegmentation as Selfie } from "@mediapipe/selfie_segmentation"
 import { memo } from "react"
 import { suspend } from "suspend-react"
 import CameraInput from "./cameraInput"
 
-const SelfieSegmentationC = memo(({ onResults }) => {
+const SelfieSegmentation = memo(({ onResults }) => {
   const selfieSegmentation = suspend(async () => {
-    const selfieSegmentation = new SelfieSegmentation({
+    const selfieSegmentation = new Selfie({
       locateFile: (file) => `selfie_segmentation/${file}`,
     })
 
@@ -30,4 +30,4 @@ const SelfieSegmentationC = memo(({ onResults }) => {
   )
 })
 
-export default SelfieSegmentationC
+export default SelfieSegmentation

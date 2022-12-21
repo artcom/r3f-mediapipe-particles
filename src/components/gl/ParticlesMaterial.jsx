@@ -1,8 +1,8 @@
 import { shaderMaterial } from "@react-three/drei"
 import { extend } from "@react-three/fiber"
 import { Vector3 } from "three"
-import fragmentShader from "../shaders/shader.frag?raw"
-import vertexShader from "../shaders/shader.vert?raw"
+import fragmentShader from "../../shaders/particles.frag?raw"
+import vertexShader from "../../shaders/particles.vert?raw"
 
 const ParticlesMaterial = shaderMaterial(
   {
