@@ -11,6 +11,10 @@ export default defineConfig({
           src: "./node_modules/@mediapipe/pose/*",
           dest: "./pose/",
         },
+        {
+          src: "./node_modules/@mediapipe/selfie_segmentation/*",
+          dest: "./selfie_segmentation/",
+        },
       ],
     }),
   ],

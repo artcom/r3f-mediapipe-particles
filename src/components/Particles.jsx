@@ -126,8 +126,8 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
   const { random, depth, size, color, speed } = useControls({
     random: { value: 2.0, min: 0, max: 100 },
     depth: { value: -58.0, min: -100, max: 100 },
-    size: { value: 2.0, min: 0, max: 100 },
-    color: { value: { r: 87, g: 135, b: 245 } },
+    size: { value: 1, min: 0.0, max: 10.0 },
+    color: { value: { r: 235, g: 235, b: 235 } },
     speed: { value: 0.01, min: 0.0, max: 1.0 },
   })
 

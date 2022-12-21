@@ -3,7 +3,7 @@ import { memo } from "react"
 import { suspend } from "suspend-react"
 import CameraInput from "./cameraInput"
 
-const PoseDetection = memo(({ onPoseResults }) => {
+const PoseDetection = memo(({ onResults }) => {
   const pose = suspend(async () => {
     const pose = new Pose({
       locateFile: (file) => `pose/${file}`,
@@ -18,12 +18,12 @@ const PoseDetection = memo(({ onPoseResults }) => {
       minTrackingConfidence: 0.5,
     })
 
-    pose.onResults(onPoseResults)
+    pose.onResults(onResults)
 
     await pose.initialize()
 
     return pose
-  }, ["initPoseDetection", onPoseResults])
+  }, ["initPoseDetection", onResults])
 
   return (
     <>

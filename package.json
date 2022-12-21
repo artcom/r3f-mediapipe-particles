@@ -5,6 +5,7 @@
   "dependencies": {
     "@mediapipe/camera_utils": "^0.3.1640029074",
     "@mediapipe/pose": "^0.5.1635988162",
+    "@mediapipe/selfie_segmentation": "^0.1.1671057942",
     "@react-three/drei": "^9.29.1",
     "@react-three/fiber": "^8.7.3",
     "@vitejs/plugin-react": "^2.1.0",

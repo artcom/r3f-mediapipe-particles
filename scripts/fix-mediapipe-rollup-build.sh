@@ -5,3 +5,4 @@ grep -qxF 'exports.POSE_CONNECTIONS = POSE_CONNECTIONS;' node_modules/@mediapipe
 grep -qxF 'exports.drawConnectors = drawConnectors;' node_modules/@mediapipe/drawing_utils/drawing_utils.js || echo 'exports.drawConnectors = drawConnectors;' >> node_modules/@mediapipe/drawing_utils/drawing_utils.js
 grep -qxF 'exports.drawLandmarks = drawLandmarks;' node_modules/@mediapipe/drawing_utils/drawing_utils.js || echo 'exports.drawLandmarks = drawLandmarks;' >> node_modules/@mediapipe/drawing_utils/drawing_utils.js
 grep -qxF 'exports.Camera = Camera;' node_modules/@mediapipe/camera_utils/camera_utils.js || echo 'exports.Camera = Camera;' >> node_modules/@mediapipe/camera_utils/camera_utils.js
+grep -qxF 'exports.SelfieSegmentation = SelfieSegmentation;' node_modules/@mediapipe/selfie_segmenation/selfie_segmenation.js || echo 'exports.SelfieSegmentation = SelfieSegmentation;' >> node_modules/@mediapipe/selfie_segmenation/selfie_segmenation.js

@@ -1,14 +1,24 @@
 import { OrbitControls, PerspectiveCamera, Stats } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useCallback, useRef } from "react"
+import SelfieSegmentation from "../pose/selfieSegmentation"
 import PoseDetection from "../pose/poseDetection"
 import Particles from "./Particles"
+import { useControls } from "leva"
 
 const App = () => {
+  const { solution, zoom } = useControls({
+    solution: {
+      value: "pose",
+      options: ["pose", "selfie"],
+    },
+    zoom: { value: 1.35, min: 0, max: 2 },
+  })
+
   const particlesRef = useRef()
   const canvasRef = useRef()
 
-  const onPoseResults = useCallback(({ segmentationMask }) => {
+  const onResults = useCallback(({ segmentationMask }) => {
     if (segmentationMask) {
       particlesRef.current.setImage(segmentationMask)
     }
@@ -17,7 +27,8 @@ const App = () => {
   return (
     <>
       <Suspense>
-        <PoseDetection onPoseResults={onPoseResults} />
+        {solution === "pose" && <PoseDetection onResults={onResults} />}
+        {solution === "selfie" && <SelfieSegmentation onResults={onResults} />}
       </Suspense>
       <canvas
         ref={canvasRef}
@@ -32,7 +43,7 @@ const App = () => {
           near={1}
           far={10000}
           position={[0, 0, 300]}
-          zoom={1.35}
+          zoom={zoom}
         />
         <OrbitControls />
         <Particles ref={particlesRef} debugCanvasRef={canvasRef} />
