@@ -8,6 +8,7 @@ uniform float uRandom;
 uniform float uSize;
 uniform float uTime;
 uniform float uDepth;
+uniform float uSpeed;
 
 varying vec2 vPUv;
 varying vec2 vUv;
@@ -103,7 +104,7 @@ void main() {
 	vec3 displaced = offset;
 	// randomise
 	displaced.xy += vec2(random(pindex) - 0.5, random(offset.x + pindex) - 0.5) * uRandom;
-	float rndz = (random(pindex) + snoise(vec2(pindex * 0.1, uTime * 0.1)));
+	float rndz = (random(pindex) + snoise(vec2(pindex * 0.1, uTime * uSpeed)));
 	displaced.z += rndz * (random(pindex) * 2.0 * uDepth);
 
 	// center

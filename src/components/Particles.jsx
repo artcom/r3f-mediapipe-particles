@@ -128,7 +128,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
     depth: { value: -58.0, min: -100, max: 100 },
     size: { value: 1, min: 0.0, max: 10.0 },
     color: { value: { r: 235, g: 235, b: 235 } },
-    speed: { value: 0.01, min: 0.0, max: 1.0 },
+    speed: { value: 0.1, min: 0.0, max: 0.5 },
   })
 
   return (

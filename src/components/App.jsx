@@ -40,7 +40,7 @@ const App = () => {
         <PerspectiveCamera
           makeDefault
           fov={50}
-          near={1}
+          near={0.01}
           far={10000}
           position={[0, 0, 300]}
           zoom={zoom}
