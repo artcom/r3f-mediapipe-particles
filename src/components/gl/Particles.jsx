@@ -39,7 +39,7 @@ const renderOffscreenToCanvas = (
 }
 
 const Particles = forwardRef(({ debugCanvasRef }, ref) => {
-  const [canvasTexture, setCanvasTexture] = useState()
+  const [image, setImage] = useState()
 
   const particlesMaterialRef = useRef()
 
@@ -50,8 +50,8 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
   })
 
   const data = useMemo(() => {
-    if (canvasTexture) {
-      const { width, height } = canvasTexture.image
+    if (image) {
+      const { width, height } = image
 
       const pixelCount = width * height
 
@@ -60,7 +60,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
       context.filter = `blur(${blur}px)`
       context.scale(1, -1)
 
-      context.drawImage(canvasTexture.image, 0, 0, width, height * -1)
+      context.drawImage(image, 0, 0, width, height * -1)
       const imageData = context.getImageData(0, 0, width, height)
 
       const indices = new Uint16Array(pixelCount)
@@ -89,7 +89,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
         attributes: { indices, offsets },
       }
     }
-  }, [canvasTexture, blur])
+  }, [image, blur])
 
   useFrame(({ clock }) => {
     if (particlesMaterialRef.current) {
@@ -99,7 +99,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
 
   useImperativeHandle(ref, () => ({
     setImage: (image) => {
-      setCanvasTexture(new CanvasTexture(image))
+      setImage(image)
     },
   }))
 
