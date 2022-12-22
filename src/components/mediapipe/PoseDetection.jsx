@@ -1,7 +1,7 @@
 import { Pose } from "@mediapipe/pose"
 import { memo } from "react"
 import { suspend } from "suspend-react"
-import CameraInput from "./cameraInput"
+import CameraInput from "./CameraInput"
 
 const PoseDetection = memo(({ onResults }) => {
   const pose = suspend(async () => {
