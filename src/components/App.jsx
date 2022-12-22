@@ -1,8 +1,8 @@
 import { OrbitControls, PerspectiveCamera, Stats } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { Suspense, useCallback, useRef } from "react"
-import SelfieSegmentation from "./mediapipe/selfieSegmentation"
-import PoseDetection from "./mediapipe/poseDetection"
+import SelfieSegmentation from "./mediapipe/SelfieSegmentation"
+import PoseDetection from "./mediapipe/PoseDetection"
 import Particles from "./gl/Particles"
 import { useControls } from "leva"
 
