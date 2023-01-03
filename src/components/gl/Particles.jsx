@@ -54,7 +54,6 @@ const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
   const { resultOffscreen, resultOffscreenContext } = useMemo(() => {
     const resultOffscreen = new OffscreenCanvas(width, height)
     const resultOffscreenContext = resultOffscreen.getContext("2d")
-    resultOffscreenContext.filter = `blur(${blur}px)`
     resultOffscreenContext.scale(1, -1)
 
     return { resultOffscreen, resultOffscreenContext }
@@ -66,10 +65,11 @@ const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
     for (let i = 0; i < images.length; i++) {
       offscreens[i] = new OffscreenCanvas(width, height)
       offscreens[i].getContext("2d").scale(1, -1)
+      offscreens[i].getContext("2d").filter = `blur(${blur}px)`
     }
 
     return offscreens
-  }, [images, width, height])
+  }, [images, width, height, blur])
 
   const data = useMemo(() => {
     if (images.length < smoothCount || offscreens.length === 0) {
