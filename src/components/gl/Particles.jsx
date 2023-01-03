@@ -48,34 +48,53 @@ const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
     thresholds: { value: [100, 200], min: 0, max: 255 },
     blur: { value: 9, min: 0, max: 50 },
     mask: false,
-    smoothCount: { value: 3, min: 0, max: 10, step: 1 },
+    smoothCount: { value: 0, min: 0, max: 10, step: 1 },
   })
 
-  // const { offscreen, context } = useMemo(() => {
-  //   const offscreen = new OffscreenCanvas(width, height)
-  //   const context = offscreen.getContext("2d")
-  //   context.filter = `blur(${blur}px)`
-  //   context.scale(1, -1)
+  const { resultOffscreen, resultOffscreenContext } = useMemo(() => {
+    const resultOffscreen = new OffscreenCanvas(width, height)
+    const resultOffscreenContext = resultOffscreen.getContext("2d")
+    resultOffscreenContext.filter = `blur(${blur}px)`
+    resultOffscreenContext.scale(1, -1)
 
-  //   return { offscreen, context }
-  // }, [width, height, blur])
+    return { resultOffscreen, resultOffscreenContext }
+  }, [width, height, blur])
+
+  const offscreens = useMemo(() => {
+    const offscreens = []
+
+    for (let i = 0; i < images.length; i++) {
+      offscreens[i] = new OffscreenCanvas(width, height)
+      offscreens[i].getContext("2d").scale(1, -1)
+    }
+
+    return offscreens
+  }, [images, width, height])
 
   const data = useMemo(() => {
-    console.log(images.length)
-    if (images.length > smoothCount) {
-      const pixelCount = width * height
+    if (images.length < smoothCount || offscreens.length === 0) {
+      return
+    }
 
-      const offscreens = []
+    const pixelCount = width * height
+
+    let imageData
+
+    if (smoothCount === 0) {
+      offscreens[0]
+        .getContext("2d")
+        .drawImage(images[0], 0, 0, width, height * -1)
+      imageData = offscreens[0]
+        .getContext("2d")
+        .getImageData(0, 0, width, height)
+    } else {
       const result = []
       for (let i = 0; i < pixelCount * 4; i++) {
         result[i] = 0
       }
 
       for (let i = 0; i < images.length; i++) {
-        offscreens[i] = new OffscreenCanvas(width, height)
         const context = offscreens[i].getContext("2d")
-
-        context.scale(1, -1)
         context.drawImage(images[i], 0, 0, width, -height)
 
         const imageData = context.getImageData(0, 0, width, height)
@@ -84,40 +103,38 @@ const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
         }
       }
 
-      const offscreen = new OffscreenCanvas(width, height)
-      const offscreenContext = offscreen.getContext("2d")
-      const imageData = offscreenContext.createImageData(width, height)
+      imageData = resultOffscreenContext.createImageData(width, height)
       for (let i = 0; i < pixelCount * 4; i++) {
         imageData.data[i] = result[i] / images.length
       }
+    }
 
-      const indices = new Uint16Array(pixelCount)
-      const offsets = new Float32Array(pixelCount * 3)
+    const indices = new Uint16Array(pixelCount)
+    const offsets = new Float32Array(pixelCount * 3)
 
-      let visibleCount = 0
-      for (let i = 0; i < pixelCount; i++) {
-        const value = imageData.data[i * 4 + 3]
+    let visibleCount = 0
+    for (let i = 0; i < pixelCount; i++) {
+      const value = imageData.data[i * 4 + 3]
 
-        if (value >= thresholds[0] && value <= thresholds[1]) {
-          offsets[visibleCount * 3 + 0] = i % width
-          offsets[visibleCount * 3 + 1] = Math.floor(i / width)
+      if (value >= thresholds[0] && value <= thresholds[1]) {
+        offsets[visibleCount * 3 + 0] = i % width
+        offsets[visibleCount * 3 + 1] = Math.floor(i / width)
 
-          indices[visibleCount] = i
+        indices[visibleCount] = i
 
-          visibleCount++
-        }
-      }
-
-      offscreenContext.putImageData(imageData, 0, 0)
-      const bitmap = offscreen.transferToImageBitmap()
-      renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, mask)
-
-      return {
-        texture: new CanvasTexture(bitmap),
-        attributes: { indices, offsets },
+        visibleCount++
       }
     }
-  }, [images, blur])
+
+    resultOffscreenContext.putImageData(imageData, 0, 0)
+    const bitmap = resultOffscreen.transferToImageBitmap()
+    renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, mask)
+
+    return {
+      texture: new CanvasTexture(bitmap),
+      attributes: { indices, offsets },
+    }
+  }, [images, blur, resultOffscreen, resultOffscreenContext, offscreens])
 
   useFrame(({ clock }) => {
     if (particlesMaterialRef.current) {
