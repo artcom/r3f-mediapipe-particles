@@ -46,9 +46,9 @@ const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
 
   const { blur, thresholds, mask, smoothCount } = useControls({
     thresholds: { value: [100, 200], min: 0, max: 255 },
-    blur: { value: 9, min: 0, max: 50 },
+    blur: { value: 4, min: 0, max: 50 },
     mask: false,
-    smoothCount: { value: 0, min: 0, max: 10, step: 1 },
+    smoothCount: { value: 4, min: 0, max: 10, step: 1 },
   })
 
   const { resultOffscreen, resultOffscreenContext } = useMemo(() => {
