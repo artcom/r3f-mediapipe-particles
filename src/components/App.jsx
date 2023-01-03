@@ -46,7 +46,12 @@ const App = () => {
           zoom={zoom}
         />
         <OrbitControls />
-        <Particles ref={particlesRef} debugCanvasRef={canvasRef} />
+        <Particles
+          ref={particlesRef}
+          debugCanvasRef={canvasRef}
+          width={320}
+          height={240}
+        />
         <Stats />
       </Canvas>
     </>

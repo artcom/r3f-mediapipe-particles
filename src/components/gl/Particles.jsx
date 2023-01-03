@@ -2,6 +2,7 @@ import { useFrame } from "@react-three/fiber"
 import { useControls } from "leva"
 import {
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useMemo,
   useRef,
@@ -38,30 +39,57 @@ const renderOffscreenToCanvas = (
   }
 }
 
-const Particles = forwardRef(({ debugCanvasRef }, ref) => {
-  const [image, setImage] = useState()
+const Particles = forwardRef(({ debugCanvasRef, width, height }, ref) => {
+  const [images, setImages] = useState([])
 
   const particlesMaterialRef = useRef()
 
-  const { blur, thresholds, mask } = useControls({
+  const { blur, thresholds, mask, smoothCount } = useControls({
     thresholds: { value: [100, 200], min: 0, max: 255 },
     blur: { value: 9, min: 0, max: 50 },
     mask: false,
+    smoothCount: { value: 3, min: 0, max: 10, step: 1 },
   })
 
-  const data = useMemo(() => {
-    if (image) {
-      const { width, height } = image
+  // const { offscreen, context } = useMemo(() => {
+  //   const offscreen = new OffscreenCanvas(width, height)
+  //   const context = offscreen.getContext("2d")
+  //   context.filter = `blur(${blur}px)`
+  //   context.scale(1, -1)
 
+  //   return { offscreen, context }
+  // }, [width, height, blur])
+
+  const data = useMemo(() => {
+    console.log(images.length)
+    if (images.length > smoothCount) {
       const pixelCount = width * height
 
-      const offscreen = new OffscreenCanvas(width, height)
-      const context = offscreen.getContext("2d")
-      context.filter = `blur(${blur}px)`
-      context.scale(1, -1)
+      const offscreens = []
+      const result = []
+      for (let i = 0; i < pixelCount * 4; i++) {
+        result[i] = 0
+      }
 
-      context.drawImage(image, 0, 0, width, height * -1)
-      const imageData = context.getImageData(0, 0, width, height)
+      for (let i = 0; i < images.length; i++) {
+        offscreens[i] = new OffscreenCanvas(width, height)
+        const context = offscreens[i].getContext("2d")
+
+        context.scale(1, -1)
+        context.drawImage(images[i], 0, 0, width, -height)
+
+        const imageData = context.getImageData(0, 0, width, height)
+        for (let j = 0; j < pixelCount * 4; j++) {
+          result[j] += imageData.data[j]
+        }
+      }
+
+      const offscreen = new OffscreenCanvas(width, height)
+      const offscreenContext = offscreen.getContext("2d")
+      const imageData = offscreenContext.createImageData(width, height)
+      for (let i = 0; i < pixelCount * 4; i++) {
+        imageData.data[i] = result[i] / images.length
+      }
 
       const indices = new Uint16Array(pixelCount)
       const offsets = new Float32Array(pixelCount * 3)
@@ -80,8 +108,8 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
         }
       }
 
+      offscreenContext.putImageData(imageData, 0, 0)
       const bitmap = offscreen.transferToImageBitmap()
-
       renderOffscreenToCanvas(debugCanvasRef, bitmap, width, height, mask)
 
       return {
@@ -89,7 +117,7 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
         attributes: { indices, offsets },
       }
     }
-  }, [image, blur])
+  }, [images, blur])
 
   useFrame(({ clock }) => {
     if (particlesMaterialRef.current) {
@@ -98,10 +126,18 @@ const Particles = forwardRef(({ debugCanvasRef }, ref) => {
   })
 
   useImperativeHandle(ref, () => ({
-    setImage: (image) => {
-      setImage(image)
-    },
+    setImage: (image) =>
+      setImages((state) => {
+        if (state.length > smoothCount) {
+          state.pop()
+        }
+        return [image, ...state]
+      }),
   }))
+
+  useEffect(() => {
+    setImages([])
+  }, [smoothCount])
 
   const { random, depth, size, color, innerColor, exponent, speed } =
     useControls({
