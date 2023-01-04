@@ -14,3 +14,5 @@
 .eslintcache
 
 npm-debug.log*
+
+demo/node_modules
