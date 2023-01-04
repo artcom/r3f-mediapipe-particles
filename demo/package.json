@@ -1,0 +1,48 @@
+{
+  "name": "@artcom/r3f-mediapipe-particles",
+  "version": "0.1.0",
+  "dependencies": {
+    "@artcom/r3f-mediapipe-particles": "file:..",
+    "@mediapipe/camera_utils": "^0.3.1640029074",
+    "@mediapipe/pose": "^0.5.1635988162",
+    "@mediapipe/selfie_segmentation": "^0.1.1671057942",
+    "@react-three/drei": "^9.29.1",
+    "@react-three/fiber": "^8.7.3",
+    "@vitejs/plugin-react": "^2.1.0",
+    "core-js": "^3.27.1",
+    "leva": "^0.9.31",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "suspend-react": "^0.0.8",
+    "three": "^0.144.0",
+    "vite-plugin-static-copy": "^0.13.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-react": "^7.31.8",
+    "prettier": "^2.7.1",
+    "vite": "^3.1.0",
+    "vite-react-jsx": "^1.1.2"
+  },
+  "scripts": {
+    "watch": "vite",
+    "prebuild": "./scripts/fix-mediapipe-rollup-build.sh",
+    "build": "vite build",
+    "postbuild": "./scripts/remove-mediapipe-rollup-fix.sh",
+    "start": "vite preview",
+    "prettier": "prettier --list-different '**/*.{js,jsx,md,ts,tsx}'"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ],
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
+    "*.{js,jsx,ts,tsx,md}": "prettier --write"
+  }
+}

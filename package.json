@@ -1,45 +1,37 @@
 {
-  "name": "r3f-mediapipe-particles",
+  "name": "@artcom/r3f-mediapipe-particles",
   "version": "0.1.0",
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "files": [
+    "lib/"
+  ],
   "dependencies": {
-    "@mediapipe/camera_utils": "^0.3.1640029074",
-    "@mediapipe/pose": "^0.5.1635988162",
-    "@mediapipe/selfie_segmentation": "^0.1.1671057942",
-    "@react-three/drei": "^9.29.1",
-    "@react-three/fiber": "^8.7.3",
-    "@vitejs/plugin-react": "^2.1.0",
-    "leva": "^0.9.31",
+    "@react-three/drei": "^9.50.4",
+    "@react-three/fiber": "^8.10.0",
+    "buffer": "^6.0.3",
+    "core-js": "^3.27.1",
+    "leva": "^0.9.34",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "suspend-react": "^0.0.8",
-    "three": "^0.144.0",
-    "vite-plugin-static-copy": "^0.13.0",
-    "zustand": "^4.1.1"
+    "suspend-react": "^0.0.9",
+    "three": "^0.148.0"
   },
   "devDependencies": {
-    "eslint": "^8.23.1",
-    "eslint-config-prettier": "^8.5.0",
+    "@babel/cli": "^7.20.7",
+    "@babel/core": "^7.20.7",
+    "@babel/preset-env": "^7.20.2",
+    "@babel/preset-react": "^7.18.6",
+    "eslint": "^8.31.0",
+    "eslint-config-prettier": "^8.6.0",
     "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-react": "^7.31.8",
-    "prettier": "^2.7.1",
-    "vite": "^3.1.0",
-    "vite-react-jsx": "^1.1.2"
+    "eslint-plugin-react": "^7.31.11",
+    "prettier": "^2.8.1",
+    "process": "^0.11.10"
   },
   "scripts": {
-    "watch": "vite",
-    "prebuild": "./scripts/fix-mediapipe-rollup-build.sh",
-    "build": "vite build",
-    "postbuild": "./scripts/remove-mediapipe-rollup-fix.sh",
-    "start": "vite preview",
-    "prettier": "prettier --list-different '**/*.{js,jsx,md,ts,tsx}'"
+    "watch": "babel --watch src --out-dir lib --copy-files",
+    "build": "babel src --out-dir lib --source-maps --copy-files"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "license": "MIT",
   "lint-staged": {
     "*.{js,jsx,ts,tsx}": "eslint --cache --fix",
