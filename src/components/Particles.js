@@ -1,5 +1,4 @@
 import { useFrame } from "@react-three/fiber"
-import { useControls } from "leva"
 import React, {
   forwardRef,
   useEffect,
