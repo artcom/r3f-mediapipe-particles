@@ -1,0 +1,5 @@
+.cameraStream {
+  position: absolute;
+  height: 100%;
+  transform: scaleX(-1);
+}
