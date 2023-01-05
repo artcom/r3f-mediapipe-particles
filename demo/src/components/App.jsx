@@ -1,6 +1,11 @@
-import { OrbitControls, PerspectiveCamera, Stats } from "@react-three/drei"
+import {
+  OrbitControls,
+  PerspectiveCamera,
+  Sphere,
+  Stats,
+} from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
-import { Suspense, useCallback, useRef } from "react"
+import { Suspense, useCallback, useRef, useState } from "react"
 import SelfieSegmentation from "./mediapipe/SelfieSegmentation"
 import PoseDetection from "./mediapipe/PoseDetection"
 import { useControls } from "leva"
@@ -12,7 +17,6 @@ const App = () => {
       value: "pose",
       options: ["pose", "selfie"],
     },
-
     thresholds: { value: [100, 200], min: 0, max: 255 },
     blur: { value: 4, min: 0, max: 50 },
     mask: false,
@@ -25,16 +29,26 @@ const App = () => {
     speed: { value: 0.1, min: 0.0, max: 0.5 },
     exponent: { value: 5.0, min: 0.0, max: 10.0 },
     zoom: { value: 1.35, min: 0, max: 2 },
+    scale: { value: 360, min: 1, max: 1000 },
   })
+
+  const [poseLandmarks, setPoseLandmarks] = useState([])
 
   const particlesRef = useRef()
   const canvasRef = useRef()
 
-  const onResults = useCallback(({ segmentationMask }) => {
-    if (segmentationMask) {
-      particlesRef.current.setImage(segmentationMask)
-    }
-  }, [])
+  const onResults = useCallback(
+    ({ segmentationMask, poseLandmarks, poseWorldLandmarks }) => {
+      if (segmentationMask) {
+        particlesRef.current.setImage(segmentationMask)
+      }
+
+      if (poseLandmarks && poseLandmarks.length > 0) {
+        setPoseLandmarks(poseLandmarks)
+      }
+    },
+    [],
+  )
 
   return (
     <>
@@ -67,6 +81,18 @@ const App = () => {
           height={240}
           options={options}
         />
+        {poseLandmarks.map((landmark, index) => (
+          <Sphere
+            key={index}
+            scale={1}
+            material-color={index === 19 || index === 20 ? "red" : "white"}
+            position={[
+              -(landmark.x * options.scale - options.scale / 2),
+              -(landmark.y * options.scale - options.scale / 2),
+              0,
+            ]}
+          />
+        ))}
         <Stats />
       </Canvas>
     </>
