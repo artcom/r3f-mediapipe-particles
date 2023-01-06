@@ -16,7 +16,7 @@ const SphereTrail = ({ position }) => {
         scale={2}
         material-color={"#F8D628"}
         material-transparent={true}
-        material-opacity={0.8}
+        material-opacity={0.2}
       />
 
       <meshLineMaterial color={"#F8D628"} opacity={0.2} transparent={true} />

@@ -1,3 +1,10 @@
 {
-  "presets": [["@babel/preset-react", { "runtime": "automatic" }]]
+  "exclude": "**/node_modules/**",
+  "presets": [
+    ["@babel/preset-env", { "loose": true, "modules": false }],
+    ["@babel/preset-react", { "runtime": "automatic" }]
+  ],
+  "plugins": [
+    ["@babel/transform-runtime", { "regenerator": false, "useESModules": true }]
+  ]
 }

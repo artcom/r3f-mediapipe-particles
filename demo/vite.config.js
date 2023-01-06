@@ -18,4 +18,7 @@ export default defineConfig({
       ],
     }),
   ],
+  optimizeDeps: {
+    exclude: ["@artcom/r3f-mediapipe-particles"],
+  },
 })
