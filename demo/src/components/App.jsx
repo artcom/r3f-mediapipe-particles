@@ -75,6 +75,8 @@ const App = () => {
           debugCanvasRef={canvasRef}
           width={320}
           height={240}
+          position={[0, 0, 0]}
+          rotation-y={Math.PI}
           options={options}
         />
 

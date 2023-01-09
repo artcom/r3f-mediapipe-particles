@@ -1,3 +1,4 @@
+import { Box } from "@react-three/drei"
 import { useFrame } from "@react-three/fiber"
 import React, {
   forwardRef,
@@ -39,7 +40,7 @@ const renderOffscreenToCanvas = (
 }
 
 const Particles = forwardRef(
-  ({ debugCanvasRef, width, height, options }, ref) => {
+  ({ debugCanvasRef, width, height, options, ...props }, ref) => {
     const [images, setImages] = useState([])
 
     const particlesMaterialRef = useRef()
@@ -166,7 +167,7 @@ const Particles = forwardRef(
     return (
       <>
         {data && (
-          <mesh rotation-y={Math.PI}>
+          <mesh {...props}>
             <instancedBufferGeometry
               index={new Uint16BufferAttribute([0, 2, 1, 2, 3, 1], 1)}
               attributes-position={
