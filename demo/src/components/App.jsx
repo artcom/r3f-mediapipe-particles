@@ -1,4 +1,3 @@
-import { Particles as ParticleImage } from "@artcom/r3f-mediapipe-particles"
 import { OrbitControls, PerspectiveCamera, Stats } from "@react-three/drei"
 import { Canvas } from "@react-three/fiber"
 import { useControls } from "leva"
@@ -6,8 +5,8 @@ import { Suspense, useCallback, useRef, useState } from "react"
 import PoseLandmarks from "./Landmarks"
 import PoseDetection from "./mediapipe/PoseDetection"
 import SelfieSegmentation from "./mediapipe/SelfieSegmentation"
+import ParticlesContext from "./ParticlesContext"
 import SphereTrail from "./sphereTrail"
-import Trail from "./sphereTrail"
 
 const App = () => {
   const options = useControls({
@@ -70,15 +69,8 @@ const App = () => {
           zoom={options.zoom}
         />
         <OrbitControls />
-        <ParticleImage
-          ref={particlesRef}
-          debugCanvasRef={canvasRef}
-          width={320}
-          height={240}
-          position={[0, 0, 0]}
-          rotation-y={Math.PI}
-          options={options}
-        />
+
+        <ParticlesContext ref={particlesRef} options={options} />
 
         {options.landmarks && (
           <PoseLandmarks landmarks={landmarks} scale={options.landmarksScale} />
