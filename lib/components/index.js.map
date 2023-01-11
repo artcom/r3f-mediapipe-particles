@@ -1,1 +1,0 @@
-{"version":3,"file":"index.js","names":["Particles"],"sources":["../../src/components/index.js"],"sourcesContent":["import Particles from \"./Particles\"\n\nexport { Particles }\n"],"mappings":"AAAA,OAAOA,SAAS,MAAM,aAAa;AAEnC,SAASA,SAAS"}
