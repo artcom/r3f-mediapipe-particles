@@ -15,9 +15,9 @@ const App = () => {
       options: ["pose", "selfie"],
     },
     thresholds: { value: [100, 200], min: 0, max: 255 },
-    blur: { value: 4, min: 0, max: 50 },
+    blur: { value: 0, min: 0, max: 50 },
     mask: false,
-    smoothCount: { value: 4, min: 0, max: 10, step: 1 },
+    smoothCount: { value: 3, min: 1, max: 10, step: 1 },
     random: { value: 2.0, min: 0, max: 100 },
     depth: { value: -58.0, min: -100, max: 100 },
     size: { value: 1, min: 0.0, max: 10.0 },
@@ -53,12 +53,14 @@ const App = () => {
           <SelfieSegmentation onResults={onResults} />
         )}
       </Suspense>
-      <canvas
-        ref={canvasRef}
-        width={320}
-        height={240}
-        className={"mask-canvas"}
-      />
+      {options.mask && (
+        <canvas
+          ref={canvasRef}
+          width={320}
+          height={240}
+          className={"mask-canvas"}
+        />
+      )}
       <Canvas>
         <PerspectiveCamera
           makeDefault
@@ -70,7 +72,11 @@ const App = () => {
         />
         <OrbitControls />
 
-        <ParticlesContext ref={particlesRef} options={options} />
+        <ParticlesContext
+          ref={particlesRef}
+          canvasRef={options.mask ? canvasRef : null}
+          options={options}
+        />
 
         {options.landmarks && (
           <PoseLandmarks landmarks={landmarks} scale={options.landmarksScale} />
@@ -78,37 +84,6 @@ const App = () => {
 
         {landmarks.length > 0 && (
           <>
-            {/* <ParticleSphere
-              count={4000}
-              scale={10}
-              position={[
-                -(
-                  landmarks[19].x * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
-                -(
-                  landmarks[19].y * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
-                0,
-              ]}
-            />
-            <ParticleSphere
-              count={4000}
-              scale={10}
-              position={[
-                -(
-                  landmarks[20].x * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
-                -(
-                  landmarks[20].y * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
-                0,
-              ]}
-            /> */}
-
             <SphereTrail
               position={[
                 -(

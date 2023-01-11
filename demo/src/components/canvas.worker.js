@@ -2,28 +2,55 @@ import { exposeWorker } from "react-hooks-worker"
 
 const images = []
 const offscreens = []
-const width = 320
-const height = 240
-const pixelCount = width * height
-const smoothCount = 4
-const blur = 4
-const thresholds = [100, 200]
+let resultOffscreen
+let resultOffscreenContext
+let width
+let height
+let smoothCount
+let blur
 
-for (let i = 0; i < smoothCount; i++) {
-  offscreens[i] = new OffscreenCanvas(width, height)
-  offscreens[i].getContext("2d").scale(1, -1)
-  offscreens[i].getContext("2d").filter = `blur(${blur}px)`
-  offscreens[i].getContext("2d").globalCompositeOperation = "copy"
+const createProcessOffscreens = () => {
+  console.log("createProcessOffscreens")
+
+  for (let i = 0; i < smoothCount; i++) {
+    offscreens[i] = new OffscreenCanvas(width, height)
+    const context = offscreens[i].getContext("2d", {
+      willReadFrequently: true,
+    })
+    context.scale(1, -1)
+    context.globalCompositeOperation = "copy"
+    context.filter = `blur(${blur}px)`
+  }
 }
 
-const resultOffscreen = new OffscreenCanvas(width, height)
-const resultOffscreenContext = resultOffscreen.getContext("2d")
-resultOffscreenContext.scale(1, -1)
-resultOffscreenContext.globalCompositeOperation = "copy"
+const createResultOffscreen = () => {
+  console.log("createResultOffscreen")
 
-const smoothImages = (image) => {
+  resultOffscreen = new OffscreenCanvas(width, height)
+  resultOffscreenContext = resultOffscreen.getContext("2d", {
+    willReadFrequently: true,
+  })
+  resultOffscreenContext.scale(1, -1)
+}
+
+const smoothImages = ({ image, options }) => {
   if (image === undefined) {
     return
+  }
+
+  if (
+    options.smoothCount !== smoothCount ||
+    options.blur !== blur ||
+    image.width !== width ||
+    image.height !== height
+  ) {
+    smoothCount = options.smoothCount
+    width = image.width
+    height = image.height
+    blur = options.blur
+
+    createProcessOffscreens()
+    createResultOffscreen()
   }
 
   images.splice(0, 0, image)
@@ -36,24 +63,38 @@ const smoothImages = (image) => {
     return
   }
 
+  const pixelCount = width * height
   const result = []
-  for (let i = 0; i < pixelCount * 4; i++) {
-    result[i] = 0
-  }
+  let imageData
 
-  for (let i = 0; i < images.length; i++) {
-    const context = offscreens[i].getContext("2d")
-    context.drawImage(images[i], 0, 0, width, -height)
-
-    const imageData = context.getImageData(0, 0, width, height)
-    for (let j = 0; j < pixelCount * 4; j++) {
-      result[j] += imageData.data[j]
+  if (images.length > 1) {
+    for (let i = 0; i < pixelCount * 4; i++) {
+      result[i] = 0
     }
-  }
 
-  const imageData = resultOffscreenContext.createImageData(width, height)
-  for (let i = 0; i < pixelCount * 4; i++) {
-    imageData.data[i] = result[i] / images.length
+    for (let i = 0; i < images.length; i++) {
+      const context = offscreens[i].getContext("2d", {
+        willReadFrequently: true,
+      })
+
+      context.drawImage(images[i], 0, 0, width, -height)
+
+      const imageData = context.getImageData(0, 0, width, height)
+      for (let j = 0; j < pixelCount * 4; j++) {
+        result[j] += imageData.data[j]
+      }
+    }
+
+    imageData = resultOffscreenContext.createImageData(width, height)
+    for (let i = 0; i < pixelCount * 4; i++) {
+      imageData.data[i] = result[i] / images.length
+    }
+  } else {
+    const context = offscreens[0].getContext("2d", {
+      willReadFrequently: true,
+    })
+    context.drawImage(images[0], 0, 0, width, -height)
+    imageData = context.getImageData(0, 0, width, height)
   }
 
   const indices = new Uint16Array(pixelCount)
@@ -63,7 +104,7 @@ const smoothImages = (image) => {
   for (let i = 0; i < pixelCount; i++) {
     const value = imageData.data[i * 4 + 3]
 
-    if (value >= thresholds[0] && value <= thresholds[1]) {
+    if (value >= options.thresholds[0] && value <= options.thresholds[1]) {
       offsets[visibleCount * 3 + 0] = i % width
       offsets[visibleCount * 3 + 1] = Math.floor(i / width)
 
