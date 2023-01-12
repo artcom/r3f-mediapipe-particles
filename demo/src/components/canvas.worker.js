@@ -9,6 +9,16 @@ let height
 let smoothCount
 let blur
 
+const createResultOffscreen = () => {
+  console.log("createResultOffscreen")
+
+  resultOffscreen = new OffscreenCanvas(width, height)
+  resultOffscreenContext = resultOffscreen.getContext("2d", {
+    willReadFrequently: true,
+  })
+  resultOffscreenContext.scale(1, -1)
+}
+
 const createProcessOffscreens = () => {
   console.log("createProcessOffscreens")
 
@@ -23,34 +33,33 @@ const createProcessOffscreens = () => {
   }
 }
 
-const createResultOffscreen = () => {
-  console.log("createResultOffscreen")
-
-  resultOffscreen = new OffscreenCanvas(width, height)
-  resultOffscreenContext = resultOffscreen.getContext("2d", {
-    willReadFrequently: true,
-  })
-  resultOffscreenContext.scale(1, -1)
-}
-
 const smoothImages = ({ image, options }) => {
-  if (image === undefined) {
-    return
-  }
+  const pixelCount = options.cameraWidth * options.cameraHeight
+  const indices = new Uint16Array(pixelCount)
+  const offsets = new Float32Array(pixelCount * 3)
 
   if (
     options.smoothCount !== smoothCount ||
     options.blur !== blur ||
-    image.width !== width ||
-    image.height !== height
+    options.cameraWidth !== width ||
+    options.cameraHeight !== height
   ) {
     smoothCount = options.smoothCount
-    width = image.width
-    height = image.height
+    width = options.cameraWidth
+    height = options.cameraHeight
     blur = options.blur
 
     createProcessOffscreens()
     createResultOffscreen()
+  }
+
+  if (!image) {
+    resultOffscreen
+      .getContext("2d")
+      .clearRect(0, 0, options.cameraWidth, options.cameraHeight)
+
+    const bitmap = resultOffscreen.transferToImageBitmap()
+    return { bitmap, indices, offsets }
   }
 
   images.splice(0, 0, image)
@@ -63,7 +72,6 @@ const smoothImages = ({ image, options }) => {
     return
   }
 
-  const pixelCount = width * height
   const result = []
   let imageData
 
@@ -96,9 +104,6 @@ const smoothImages = ({ image, options }) => {
     context.drawImage(images[0], 0, 0, width, -height)
     imageData = context.getImageData(0, 0, width, height)
   }
-
-  const indices = new Uint16Array(pixelCount)
-  const offsets = new Float32Array(pixelCount * 3)
 
   let visibleCount = 0
   for (let i = 0; i < pixelCount; i++) {

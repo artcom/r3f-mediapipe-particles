@@ -19,19 +19,14 @@ const ParticlesContext = forwardRef(({ options, canvasRef }, ref) => {
   useEffect(() => {
     if (!result || !canvasRef) return
     const debugContext = canvasRef.current.getContext("2d")
-    debugContext.clearRect(
-      0,
-      0,
-      canvasRef.current.width,
-      canvasRef.current.height,
-    )
+    debugContext.clearRect(0, 0, options.cameraWidth, options.cameraHeight)
     debugContext.scale(1, -1)
     debugContext.drawImage(
       result.bitmap,
       0,
       0,
-      result.bitmap.width,
-      result.bitmap.height * -1,
+      options.cameraWidth,
+      options.cameraHeight * -1,
     )
   }, [result, options.mask])
 

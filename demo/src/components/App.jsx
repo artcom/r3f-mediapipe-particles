@@ -28,6 +28,8 @@ const App = () => {
     zoom: { value: 1.35, min: 0, max: 2 },
     landmarks: false,
     landmarksScale: { value: 360, min: 1, max: 1000 },
+    cameraWidth: 320,
+    cameraHeight: 240,
   })
 
   const [landmarks, setLandmarks] = useState([])
@@ -38,6 +40,8 @@ const App = () => {
   const onResults = useCallback(({ segmentationMask, poseLandmarks }) => {
     if (segmentationMask) {
       particlesRef.current.setImage(segmentationMask)
+    } else {
+      particlesRef.current.setImage(null)
     }
 
     if (poseLandmarks && poseLandmarks.length > 0) {
@@ -48,16 +52,26 @@ const App = () => {
   return (
     <>
       <Suspense>
-        {options.solution === "pose" && <PoseDetection onResults={onResults} />}
+        {options.solution === "pose" && (
+          <PoseDetection
+            onResults={onResults}
+            cameraWidth={options.cameraWidth}
+            cameraHeight={options.cameraHeight}
+          />
+        )}
         {options.solution === "selfie" && (
-          <SelfieSegmentation onResults={onResults} />
+          <SelfieSegmentation
+            onResults={onResults}
+            cameraWidth={options.cameraWidth}
+            cameraHeight={options.cameraHeight}
+          />
         )}
       </Suspense>
       {options.mask && (
         <canvas
           ref={canvasRef}
-          width={320}
-          height={240}
+          width={options.cameraWidth}
+          height={options.cameraHeight}
           className={"mask-canvas"}
         />
       )}

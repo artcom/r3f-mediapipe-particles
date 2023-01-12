@@ -4,7 +4,7 @@ import { Camera } from "@mediapipe/camera_utils"
 import css from "./camera.module.css"
 import { useControls } from "leva"
 
-const CameraInput = ({ onFrame }) => {
+const CameraInput = ({ onFrame, width, height }) => {
   const { video } = useControls({ video: false })
 
   const videoRef = useRef()
@@ -20,8 +20,8 @@ const CameraInput = ({ onFrame }) => {
         onFrame({ image: videoRef.current })
       },
       facingMode: "user",
-      width: 320,
-      height: 240,
+      width: width,
+      height: height,
     })
   }, [])
 

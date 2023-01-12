@@ -3,7 +3,7 @@ import { memo } from "react"
 import { suspend } from "suspend-react"
 import CameraInput from "./CameraInput"
 
-const SelfieSegmentation = memo(({ onResults }) => {
+const SelfieSegmentation = memo(({ onResults, cameraWidth, cameraHeight }) => {
   const selfieSegmentation = suspend(async () => {
     const selfieSegmentation = new Selfie({
       locateFile: (file) => `selfie_segmentation/${file}`,
@@ -21,6 +21,8 @@ const SelfieSegmentation = memo(({ onResults }) => {
     <>
       {selfieSegmentation && (
         <CameraInput
+          width={cameraWidth}
+          height={cameraHeight}
           onFrame={async (frameData) =>
             await selfieSegmentation.send(frameData)
           }
