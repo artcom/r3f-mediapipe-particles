@@ -10,7 +10,7 @@ import {
 } from "three"
 import { ParticlesMaterial } from "./ParticlesMaterial"
 
-const Particles = ({ bitmap, indices, offsets, options }) => {
+const Particles = ({ bitmap, indices, offsets, options, ...props }) => {
   const [texture, setTexture] = useState()
 
   const particlesMaterialRef = useRef()
@@ -30,7 +30,7 @@ const Particles = ({ bitmap, indices, offsets, options }) => {
   return (
     <>
       {texture && (
-        <mesh rotation-y={Math.PI}>
+        <mesh rotation-y={Math.PI} {...props}>
           <instancedBufferGeometry
             index={new Uint16BufferAttribute([0, 2, 1, 2, 3, 1], 1)}
             attributes-position={
