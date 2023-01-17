@@ -4,6 +4,7 @@ import {
   AdditiveBlending,
   CanvasTexture,
   Float32BufferAttribute,
+  MathUtils,
   Uint16BufferAttribute,
   Vector2,
   Vector3,
@@ -15,11 +16,21 @@ const Particles = ({ bitmap, indices, offsets, options, ...props }) => {
 
   const particlesMaterialRef = useRef()
 
-  const { random, depth, size, color, innerColor, exponent, speed } = options
+  const { color, innerColor } = options
 
   useFrame(({ clock }) => {
     if (particlesMaterialRef.current) {
       particlesMaterialRef.current.uniforms.uTime.value = clock.elapsedTime
+    }
+
+    const { color, innerColor, interpolationFactor, ...rest } = options
+    for (const key in rest) {
+      const name = `u${key.charAt(0).toUpperCase() + key.slice(1)}`
+      particlesMaterialRef.current.uniforms[name].value = MathUtils.lerp(
+        particlesMaterialRef.current.uniforms[name].value,
+        options[key],
+        options.interpolationFactor,
+      )
     }
   })
 
@@ -65,10 +76,6 @@ const Particles = ({ bitmap, indices, offsets, options, ...props }) => {
             uTextureSize={
               new Vector2(texture.image.width, texture.image.height)
             }
-            uRandom={random}
-            uDepth={depth}
-            uSize={size}
-            uSpeed={speed}
             uColor={
               new Vector3(color.r / 255.0, color.g / 255.0, color.b / 255.0)
             }
@@ -79,7 +86,6 @@ const Particles = ({ bitmap, indices, offsets, options, ...props }) => {
                 innerColor.b / 255.0,
               )
             }
-            uExponent={exponent}
             blending={AdditiveBlending}
             depthWrite={false}
           />

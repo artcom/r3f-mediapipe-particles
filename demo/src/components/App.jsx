@@ -30,6 +30,7 @@ const App = () => {
     landmarksScale: { value: 360, min: 1, max: 1000 },
     cameraWidth: 320,
     cameraHeight: 240,
+    interpolationFactor: { value: 1, min: 0.001, max: 1.0, step: 0.001 },
   })
 
   const [landmarks, setLandmarks] = useState([])

@@ -1,13 +1,27 @@
 import { exposeWorker } from "react-hooks-worker"
 
-const images = []
-const offscreens = []
+let imagesData = []
 let resultOffscreen
 let resultOffscreenContext
+let processOffscreenContext
 let width
 let height
 let smoothCount
 let blur
+let indices
+let offsets
+let pixelCount
+
+const init = (options) => {
+  smoothCount = options.smoothCount
+  width = options.cameraWidth
+  height = options.cameraHeight
+  blur = options.blur
+
+  createProcessOffscreenContext()
+  createResultOffscreen()
+  createAttributeArrays()
+}
 
 const createResultOffscreen = () => {
   console.log("createResultOffscreen")
@@ -19,113 +33,91 @@ const createResultOffscreen = () => {
   resultOffscreenContext.scale(1, -1)
 }
 
-const createProcessOffscreens = () => {
+const createProcessOffscreenContext = () => {
   console.log("createProcessOffscreens")
 
-  for (let i = 0; i < smoothCount; i++) {
-    offscreens[i] = new OffscreenCanvas(width, height)
-    const context = offscreens[i].getContext("2d", {
-      willReadFrequently: true,
-    })
-    context.scale(1, -1)
-    context.globalCompositeOperation = "copy"
-    context.filter = `blur(${blur}px)`
-  }
+  processOffscreenContext = new OffscreenCanvas(width, height).getContext("2d", {
+    willReadFrequently: false,
+  })
+  processOffscreenContext.scale(1, -1)
+  processOffscreenContext.globalCompositeOperation = "copy"
+  processOffscreenContext.filter = `blur(${blur}px)`
+}
+
+const createAttributeArrays = () => {
+  pixelCount = width * height
+  indices = new Uint16Array(pixelCount)
+  offsets = new Float32Array(pixelCount * 3)
 }
 
 const smoothImages = ({ image, options }) => {
-  const pixelCount = options.cameraWidth * options.cameraHeight
-  const indices = new Uint16Array(pixelCount)
-  const offsets = new Float32Array(pixelCount * 3)
-
   if (
     options.smoothCount !== smoothCount ||
     options.blur !== blur ||
     options.cameraWidth !== width ||
     options.cameraHeight !== height
   ) {
-    smoothCount = options.smoothCount
-    width = options.cameraWidth
-    height = options.cameraHeight
-    blur = options.blur
-
-    createProcessOffscreens()
-    createResultOffscreen()
+    init(options)
   }
+
+  indices.fill(0)
+  offsets.fill(0)
 
   if (!image) {
-    resultOffscreen
-      .getContext("2d")
-      .clearRect(0, 0, options.cameraWidth, options.cameraHeight)
-
-    const bitmap = resultOffscreen.transferToImageBitmap()
-    return { bitmap, indices, offsets }
+    resultOffscreenContext.clearRect(0, 0, width, height)
+    return { bitmap: resultOffscreen.transferToImageBitmap(), indices, offsets }
   }
 
-  images.splice(0, 0, image)
+  processOffscreenContext.drawImage(image, 0, 0, width, height * -1)
+  const currentImageData = processOffscreenContext.getImageData(0, 0, width, height)
+  imagesData = [currentImageData, ...imagesData.slice(0, smoothCount - 1)]
 
-  if (images.length > smoothCount) {
-    images.pop()
-  }
+  if (imagesData.length === smoothCount) {
+    const result = []
+    let resultImageData
 
-  if (images.length < smoothCount) {
-    return
-  }
+    if (imagesData.length > 1) {
+      for (let i = 0; i < pixelCount; i++) {
+        result[i] = 0
+      }
 
-  const result = []
-  let imageData
+      for (let i = 0; i < imagesData.length; i++) {
+        for (let j = 0; j < pixelCount; j++) {
+          result[j] += imagesData[i].data[j * 4 + 3]
+        }
+      }
 
-  if (images.length > 1) {
-    for (let i = 0; i < pixelCount * 4; i++) {
-      result[i] = 0
+      resultImageData = resultOffscreenContext.createImageData(width, height)
+      for (let i = 0; i < pixelCount; i++) {
+        resultImageData.data[i * 4 + 3] = result[i] / imagesData.length
+      }
+    } else {
+      resultImageData = imagesData[0]
     }
 
-    for (let i = 0; i < images.length; i++) {
-      const context = offscreens[i].getContext("2d", {
-        willReadFrequently: true,
-      })
+    let visibleCount = 0
 
-      context.drawImage(images[i], 0, 0, width, -height)
+    for (let i = 0; i < pixelCount; i++) {
+      const value = resultImageData.data[i * 4 + 3]
 
-      const imageData = context.getImageData(0, 0, width, height)
-      for (let j = 0; j < pixelCount * 4; j++) {
-        result[j] += imageData.data[j]
+      if (value >= options.thresholds[0] && value <= options.thresholds[1]) {
+        offsets[visibleCount * 3 + 0] = i % width
+        offsets[visibleCount * 3 + 1] = Math.floor(i / width)
+
+        indices[visibleCount] = i
+
+        visibleCount++
       }
     }
 
-    imageData = resultOffscreenContext.createImageData(width, height)
-    for (let i = 0; i < pixelCount * 4; i++) {
-      imageData.data[i] = result[i] / images.length
+    resultOffscreenContext.putImageData(resultImageData, 0, 0)
+    const bitmap = resultOffscreen.transferToImageBitmap()
+
+    return {
+      bitmap,
+      indices,
+      offsets,
     }
-  } else {
-    const context = offscreens[0].getContext("2d", {
-      willReadFrequently: true,
-    })
-    context.drawImage(images[0], 0, 0, width, -height)
-    imageData = context.getImageData(0, 0, width, height)
-  }
-
-  let visibleCount = 0
-  for (let i = 0; i < pixelCount; i++) {
-    const value = imageData.data[i * 4 + 3]
-
-    if (value >= options.thresholds[0] && value <= options.thresholds[1]) {
-      offsets[visibleCount * 3 + 0] = i % width
-      offsets[visibleCount * 3 + 1] = Math.floor(i / width)
-
-      indices[visibleCount] = i
-
-      visibleCount++
-    }
-  }
-
-  resultOffscreen.getContext("2d").putImageData(imageData, 0, 0)
-  const bitmap = resultOffscreen.transferToImageBitmap()
-
-  return {
-    bitmap,
-    indices,
-    offsets,
   }
 }
 

@@ -30,6 +30,17 @@ const ParticlesContext = forwardRef(({ options, canvasRef }, ref) => {
     )
   }, [result, options.mask])
 
+  const particlesOptions = {
+    random: options.random,
+    depth: options.depth,
+    size: options.size,
+    color: options.color,
+    innerColor: options.innerColor,
+    speed: options.speed,
+    exponent: options.exponent,
+    interpolationFactor: options.interpolationFactor,
+  }
+
   return (
     <>
       {result && (
@@ -37,7 +48,7 @@ const ParticlesContext = forwardRef(({ options, canvasRef }, ref) => {
           bitmap={result.bitmap}
           indices={result.indices}
           offsets={result.offsets}
-          options={options}
+          options={particlesOptions}
         />
       )}
     </>
