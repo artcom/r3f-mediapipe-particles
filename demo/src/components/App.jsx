@@ -9,29 +9,18 @@ import ParticlesContext from "./ParticlesContext"
 import SphereTrail from "./sphereTrail"
 
 const App = () => {
-  const options = useControls({
+  const [options] = useControls("Particles Options", () => ({
     solution: {
       value: "pose",
       options: ["pose", "selfie"],
     },
-    thresholds: { value: [100, 200], min: 0, max: 255 },
-    blur: { value: 0, min: 0, max: 50 },
-    mask: false,
-    smoothCount: { value: 3, min: 1, max: 10, step: 1 },
-    random: { value: 2.0, min: 0, max: 100 },
-    depth: { value: -58.0, min: -100, max: 100 },
-    size: { value: 1, min: 0.0, max: 10.0 },
-    color: { value: { r: 235, g: 235, b: 235 } },
-    innerColor: { value: { r: 235, g: 235, b: 235 } },
-    speed: { value: 0.1, min: 0.0, max: 0.5 },
-    exponent: { value: 5.0, min: 0.0, max: 10.0 },
+
     zoom: { value: 1.35, min: 0, max: 2 },
     landmarks: false,
     landmarksScale: { value: 360, min: 1, max: 1000 },
     cameraWidth: 320,
     cameraHeight: 240,
-    interpolationFactor: { value: 1, min: 0.001, max: 1.0, step: 0.001 },
-  })
+  }))
 
   const [landmarks, setLandmarks] = useState([])
 
@@ -90,7 +79,8 @@ const App = () => {
         <ParticlesContext
           ref={particlesRef}
           canvasRef={options.mask ? canvasRef : null}
-          options={options}
+          width={options.cameraWidth}
+          height={options.cameraHeight}
         />
 
         {options.landmarks && (
