@@ -9,7 +9,7 @@ import ParticlesContext from "./ParticlesContext"
 import SphereTrail from "./sphereTrail"
 
 const App = () => {
-  const [options] = useControls("Particles Options", () => ({
+  const [options] = useControls("Canvas Options", () => ({
     solution: {
       value: "pose",
       options: ["pose", "selfie"],
@@ -20,6 +20,7 @@ const App = () => {
     landmarksScale: { value: 360, min: 1, max: 1000 },
     cameraWidth: 320,
     cameraHeight: 240,
+    mask: false,
   }))
 
   const [landmarks, setLandmarks] = useState([])
@@ -81,6 +82,7 @@ const App = () => {
           canvasRef={options.mask ? canvasRef : null}
           width={options.cameraWidth}
           height={options.cameraHeight}
+          mask={options.mask}
         />
 
         {options.landmarks && (
@@ -91,10 +93,8 @@ const App = () => {
           <>
             <SphereTrail
               position={[
-                -(
-                  landmarks[19].x * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
+                landmarks[19].x * options.landmarksScale -
+                  options.landmarksScale / 2,
                 -(
                   landmarks[19].y * options.landmarksScale -
                   options.landmarksScale / 2
@@ -104,10 +104,8 @@ const App = () => {
             />
             <SphereTrail
               position={[
-                -(
-                  landmarks[20].x * options.landmarksScale -
-                  options.landmarksScale / 2
-                ),
+                landmarks[20].x * options.landmarksScale -
+                  options.landmarksScale / 2,
                 -(
                   landmarks[20].y * options.landmarksScale -
                   options.landmarksScale / 2

@@ -29,7 +29,7 @@ const Particles = forwardRef(
     return (
       <>
         {texture && (
-          <mesh rotation-y={Math.PI} {...props} ref={ref}>
+          <mesh rotation-x={Math.PI} {...props} ref={ref}>
             <instancedBufferGeometry
               index={new Uint16BufferAttribute([0, 2, 1, 2, 3, 1], 1)}
               attributes-position={

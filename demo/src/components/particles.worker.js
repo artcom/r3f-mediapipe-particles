@@ -28,7 +28,7 @@ const createResultOffscreen = () => {
   _resultOffscreenContext = _resultOffscreen.getContext("2d", {
     willReadFrequently: true,
   })
-  _resultOffscreenContext.scale(1, -1)
+  // _resultOffscreenContext.scale(1, -1)
 }
 
 const createProcessOffscreenContext = () => {
@@ -38,7 +38,7 @@ const createProcessOffscreenContext = () => {
       willReadFrequently: true,
     },
   )
-  _processOffscreenContext.scale(1, -1)
+  // _processOffscreenContext.scale(1, -1)
   _processOffscreenContext.globalCompositeOperation = "copy"
   _processOffscreenContext.filter = `blur(${_blur}px)`
 }
@@ -60,7 +60,7 @@ const createEmptyBitmap = () => {
 }
 
 const getImageData = (image) => {
-  _processOffscreenContext.drawImage(image, 0, 0, _width, _height * -1)
+  _processOffscreenContext.drawImage(image, 0, 0, _width, _height)
   return _processOffscreenContext.getImageData(0, 0, _width, _height)
 }
 

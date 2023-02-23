@@ -11,7 +11,7 @@ const PoseDetection = memo(({ onResults, cameraWidth, cameraHeight }) => {
 
     pose.setOptions({
       modelComplexity: 1,
-      selfieMode: false,
+      selfieMode: true,
       enableSegmentation: true,
       smoothSegmentation: true,
       minDetectionConfidence: 0.5,

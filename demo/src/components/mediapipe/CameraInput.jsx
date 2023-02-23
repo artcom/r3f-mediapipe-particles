@@ -20,8 +20,8 @@ const CameraInput = ({ onFrame, width, height }) => {
         onFrame({ image: videoRef.current })
       },
       facingMode: "user",
-      width: width,
-      height: height,
+      width,
+      height,
     })
   }, [])
 
